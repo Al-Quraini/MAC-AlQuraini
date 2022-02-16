@@ -85,6 +85,19 @@ class MovieDetailViewController: UIViewController {
         return button
     }()
     
+    // title label
+    private lazy var productionsLabel : UILabel = {
+        let label = UILabel()
+        let font = UIFont.systemFont(ofSize: 20, weight: .medium)
+        label.font = font
+        label.textColor = .darkText
+        label.numberOfLines = 1
+        label.text = "Production Companies"
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        return label
+    }()
+    
     // collection view
     private lazy var collectionView : UICollectionView = {
         
@@ -113,6 +126,11 @@ class MovieDetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
+        self.title = movie.title
+        
+        let backButton = UIBarButtonItem()
+        backButton.title = "Movies"
+        self.navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
         
         // add subview
         addSubviews()
@@ -160,12 +178,17 @@ class MovieDetailViewController: UIViewController {
         favouriteButton.heightAnchor.constraint(equalToConstant: 60).isActive = true
         favouriteButton.widthAnchor.constraint(equalToConstant: 60).isActive = true
         
+        // production company title
+        productionsLabel.topAnchor.constraint(equalTo: favouriteButton.bottomAnchor, constant: 40).isActive = true
+        productionsLabel.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 20).isActive = true
+        
+        
         // collection view constraints
-        collectionView.topAnchor.constraint(equalTo: favouriteButton.bottomAnchor, constant: 40).isActive = true
+        collectionView.topAnchor.constraint(equalTo: productionsLabel.bottomAnchor, constant: 10).isActive = true
         collectionView.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor).isActive = true
         collectionView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor).isActive = true
         collectionView.heightAnchor.constraint(equalToConstant: 150).isActive = true
-//        collectionView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor).isActive = true
+
    
     }
     
@@ -179,6 +202,7 @@ class MovieDetailViewController: UIViewController {
         view.addSubview(overviewLabel)
         view.addSubview(favouriteButton)
         view.addSubview(collectionView)
+        view.addSubview(productionsLabel)
     }
     
     // binding
