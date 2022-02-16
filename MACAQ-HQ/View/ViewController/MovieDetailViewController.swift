@@ -25,9 +25,13 @@ class MovieDetailViewController: UIViewController {
     
     // combine
     private let viewModelCombine = ViewModelCombine.shared
+    private let viewModelCompletion = ViewModelCompletion()
+    
     private var subscribers = Set<AnyCancellable>()
     
     private var isFavourite : Bool = false
+    
+    private lazy var productionCompanies = [ProductionCompany]()
     
     // image view
     private lazy var movieImage : UIImageView = {
@@ -81,6 +85,29 @@ class MovieDetailViewController: UIViewController {
         return button
     }()
     
+    // collection view
+    private lazy var collectionView : UICollectionView = {
+        
+        let layout = UICollectionViewFlowLayout()
+        layout.itemSize = CGSize(width: (view.frame.size.width/1), height: (view.frame.size.width/3))
+        layout.minimumLineSpacing = 1
+        layout.minimumInteritemSpacing = 1
+        layout.scrollDirection = .horizontal
+        layout.sectionInset = UIEdgeInsets(top: 5, left: 10, bottom: 5, right: 10)
+        
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.register(ProductionCompanyCollectionViewCell.self, forCellWithReuseIdentifier: ProductionCompanyCollectionViewCell.identifier)
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.clipsToBounds = true
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.backgroundColor = .systemBackground
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        
+        
+        return collectionView
+    }()
+    
     
     //MARK: - Main
     override func viewDidLoad() {
@@ -132,6 +159,13 @@ class MovieDetailViewController: UIViewController {
         favouriteButton.topAnchor.constraint(equalTo: movieImage.bottomAnchor, constant: 20).isActive = true
         favouriteButton.heightAnchor.constraint(equalToConstant: 60).isActive = true
         favouriteButton.widthAnchor.constraint(equalToConstant: 60).isActive = true
+        
+        // collection view constraints
+        collectionView.topAnchor.constraint(equalTo: favouriteButton.bottomAnchor, constant: 40).isActive = true
+        collectionView.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor).isActive = true
+        collectionView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor).isActive = true
+        collectionView.heightAnchor.constraint(equalToConstant: 150).isActive = true
+//        collectionView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor).isActive = true
    
     }
     
@@ -144,6 +178,7 @@ class MovieDetailViewController: UIViewController {
         view.addSubview(titleLabel)
         view.addSubview(overviewLabel)
         view.addSubview(favouriteButton)
+        view.addSubview(collectionView)
     }
     
     // binding
@@ -159,6 +194,15 @@ class MovieDetailViewController: UIViewController {
             .store(in: &subscribers)
         
         viewModelCombine.fetchCoreData()
+        
+        // production completion
+        viewModelCompletion.getProductionCompanies(movie.id) { [weak self] productionCompanies in
+            self?.productionCompanies = productionCompanies
+            DispatchQueue.main.async {
+                self?.collectionView.reloadData()
+
+            }
+        }
     }
     
     // updata UI
@@ -181,4 +225,21 @@ class MovieDetailViewController: UIViewController {
         }
     }
 
+}
+
+//MARK: - UICollectionViewDelegate, UICollectionViewDataSource
+extension MovieDetailViewController : UICollectionViewDataSource, UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return productionCompanies.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ProductionCompanyCollectionViewCell.identifier, for: indexPath)
+                as! ProductionCompanyCollectionViewCell
+        cell.configureCell(with: productionCompanies[indexPath.row])
+        
+        return cell
+    }
+    
+    
 }
