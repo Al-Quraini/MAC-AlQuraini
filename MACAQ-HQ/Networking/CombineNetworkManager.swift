@@ -10,7 +10,7 @@ import Combine
 
 class NetworkManagerCombine {
     
-    func getMovies<T : Codable>(_ model : T.Type,from url: String) -> AnyPublisher<T, Error> {
+    func fetchData<T : Codable>(_ model : T.Type,from url: String) -> AnyPublisher<T, Error> {
         
         guard let url = URL(string: url) else {
             fatalError()

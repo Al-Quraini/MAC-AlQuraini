@@ -14,21 +14,40 @@ class ViewModelCombine {
     
     static let shared = ViewModelCombine()
     
-    private let networkManager = NetworkManagerCombine()
+    private let networkManagerCombine = NetworkManagerCombine()
+    private let networkManagerCompletion = NetworkManagerCompletion()
+
     private var cancellers = Set<AnyCancellable>()
     
     @Published var movies = [Movie]()
     @Published var movieIds = [Int]()
     
     func getMovies() {
-        networkManager
-            .getMovies(MovieModel.self,from: NetworkURLs.baseURL)
+        networkManagerCombine
+            .fetchData(MovieModel.self,from: NetworkURLs.baseURL)
             .sink(receiveCompletion: { _ in },
                   receiveValue: { [weak self] response in
                 self?.movies = response.results
             })
             .store(in: &cancellers)
     }
+    
+    func getProductionCompanies(_ id : Int, completion : @escaping ([ProductionCompany]) -> Void){
+        let productionUrl = "\(NetworkURLs.productionUrl)\(id)/\(NetworkURLs.apiKey)"
+        networkManagerCompletion.performRequest(ProductionModel.self, from: productionUrl) { result in
+            switch result {
+                case .success(let response):
+                   completion(response.productionCompanies)
+                
+                case .failure(let error):
+                    print(error.localizedDescription)
+                completion([])
+                        }
+                    }
+        }
+    
+    
+    
     
     // core data view model
     
