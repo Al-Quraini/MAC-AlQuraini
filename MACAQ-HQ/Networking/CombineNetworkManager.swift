@@ -11,11 +11,9 @@ import Combine
 class NetworkManagerCombine {
     
     func fetchData<T : Codable>(_ model : T.Type,from url: String) -> AnyPublisher<T, Error> {
-        
         guard let url = URL(string: url) else {
             fatalError()
         }
-        
         return URLSession
             .shared
             .dataTaskPublisher(for: url)

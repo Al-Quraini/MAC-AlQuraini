@@ -26,25 +26,12 @@ class ViewModelCombine {
         networkManagerCombine
             .fetchData(MovieModel.self,from: NetworkURLs.baseURL)
             .sink(receiveCompletion: { _ in },
-                  receiveValue: { [weak self] response in
-                self?.movies = response.results
+                  receiveValue: { response in
+                self.movies = response.results
             })
             .store(in: &cancellers)
     }
     
-    func getProductionCompanies(_ id : Int, completion : @escaping ([ProductionCompany]) -> Void){
-        let productionUrl = "\(NetworkURLs.productionUrl)\(id)/\(NetworkURLs.apiKey)"
-        networkManagerCompletion.performRequest(ProductionModel.self, from: productionUrl) { result in
-            switch result {
-                case .success(let response):
-                   completion(response.productionCompanies)
-                
-                case .failure(let error):
-                    print(error.localizedDescription)
-                completion([])
-                        }
-                    }
-        }
     
     
     
